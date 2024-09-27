@@ -16,6 +16,7 @@ namespace DevBasics.CarManagement
 
             var bulkRegistrationServiceMock = new BulkRegistrationServiceMock();
             var leasingRegistrationRepository = new LeasingRegistrationRepository();
+            var settingsRepository = new SettingsRepository();
             var carRegistrationRepositoryMock = new CarRegistrationRepository(
                 leasingRegistrationRepository,
                 bulkRegistrationServiceMock,
@@ -23,14 +24,12 @@ namespace DevBasics.CarManagement
 
             var service = new CarManagementService(
                 mapper,
-                new CarManagementSettings(),
+                new GlobalizationSettings(),
                 new HttpHeaderSettings(),
-                new KowoLeasingApiClientMock(),
-                new TransactionStateServiceMock(),
                 bulkRegistrationServiceMock,
-                new RegistrationDetailServiceMock(),
                 leasingRegistrationRepository,
-                carRegistrationRepositoryMock);
+                carRegistrationRepositoryMock,
+                settingsRepository);
 
             var result = await service.RegisterCarsAsync(
                 new RegisterCarsModel

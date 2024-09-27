@@ -2,23 +2,13 @@
 
 namespace DevBasics.CarManagement
 {
-    public class CarManagementSettings
+	public class GlobalizationSettings: IGlobalizationSettings
     {
-        public IDictionary<int, string> ApiEndpoints { get; set; } = new Dictionary<int, string>();
-        public IDictionary<string, string> HttpHeaders { get; set; } = new Dictionary<string, string>();
         public IDictionary<string, string> LanguageCodes { get; set; } = new Dictionary<string, string>();
         public IDictionary<string, int> TimeZones { get; set; } = new Dictionary<string, int>();
 
-        public CarManagementSettings()
+        public GlobalizationSettings()
         {
-            // Define all Leasing API Endpoints.
-            ApiEndpoints.Add(1, "/bulk-registration-devices");
-            ApiEndpoints.Add(2, "/check-transaction-status");
-            ApiEndpoints.Add(3, "/show-registration-details");
-
-            // Define headers for HTTP-Requests.
-            HttpHeaders.Add("Content-Type", "application/json");
-
             // Define valid language codes (see Leasing API Spec).
             LanguageCodes.Add("Dutch", "nl");
             LanguageCodes.Add("English", "en");

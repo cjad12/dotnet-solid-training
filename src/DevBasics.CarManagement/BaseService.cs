@@ -7,45 +7,25 @@ namespace DevBasics.CarManagement
 {
     public class BaseService
     {
-        public CarManagementSettings Settings { get; set; }
+        public IGlobalizationSettings GlobalizationSettings { get; set; }
 
         public HttpHeaderSettings HttpHeader { get; set; }
 
-        public IKowoLeasingApiClient ApiClient { get; set; }
-
-        public IBulkRegistrationService BulkRegistrationService { get; set; }
-
-        public ITransactionStateService TransactionStateService { get; set; }
-
-        public IRegistrationDetailService RegistrationDetailService { get; set; }
 
         public ILeasingRegistrationRepository LeasingRegistrationRepository { get; set; }
+        public ISettingsRepository SettingsRepository { get; set; }
 
-        public ICarRegistrationRepository CarLeasingRepository { get; set; }
 
-        public BaseService(
-            CarManagementSettings settings,
-            HttpHeaderSettings httpHeader,
-            IKowoLeasingApiClient apiClient,
-            IBulkRegistrationService bulkRegistrationService = null,
-            ITransactionStateService transactionStateService = null,
-            IRegistrationDetailService registrationDetailService = null,
-            ILeasingRegistrationRepository leasingRegistrationRepository = null,
-            ICarRegistrationRepository carLeasingRepository = null)
+        public BaseService(IGlobalizationSettings globalizationSettings,
+	        HttpHeaderSettings httpHeader,
+	        ILeasingRegistrationRepository leasingRegistrationRepository,
+	        ISettingsRepository settingsRepository)
         {
             // Mandatory
-            Settings = settings;
+            GlobalizationSettings = globalizationSettings;
             HttpHeader = httpHeader;
-            ApiClient = apiClient;
-
-            // Optional Services
-            BulkRegistrationService = bulkRegistrationService;
-            TransactionStateService = transactionStateService;
-            RegistrationDetailService = registrationDetailService;
-
-            // Optional Repositories
             LeasingRegistrationRepository = leasingRegistrationRepository;
-            CarLeasingRepository = carLeasingRepository;
+            SettingsRepository = settingsRepository;
         }
 
         public async Task<RequestContext> InitializeRequestContextAsync()
@@ -54,7 +34,7 @@ namespace DevBasics.CarManagement
 
             try
             {
-                AppSettingDto settingResult = await LeasingRegistrationRepository.GetAppSettingAsync(HttpHeader.SalesOrgIdentifier, HttpHeader.WebAppType);
+                AppSettingDto settingResult = await SettingsRepository.GetAppSettingAsync(HttpHeader.SalesOrgIdentifier, HttpHeader.WebAppType);
 
                 if (settingResult == null)
                 {
@@ -64,7 +44,7 @@ namespace DevBasics.CarManagement
                 RequestContext requestContext = new RequestContext()
                 {
                     ShipTo = settingResult.SoldTo,
-                    LanguageCode = Settings.LanguageCodes["English"],
+                    LanguageCode = GlobalizationSettings.LanguageCodes["English"],
                     TimeZone = "Europe/Berlin"
                 };
 

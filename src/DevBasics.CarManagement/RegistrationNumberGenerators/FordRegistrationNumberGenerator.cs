@@ -1,4 +1,4 @@
-﻿namespace DevBasics.CarManagement;
+﻿namespace DevBasics.CarManagement.RegistrationNumberGenerators;
 
 public class FordRegistrationNumberGenerator : IRegistrationNumberGenerator
 {

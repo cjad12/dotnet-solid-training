@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DevBasics.CarManagement;
+namespace DevBasics.CarManagement.RegistrationNumberGenerators;
 
 public class UndefinedRegistrationNumberGenerator : IRegistrationNumberGenerator
 {

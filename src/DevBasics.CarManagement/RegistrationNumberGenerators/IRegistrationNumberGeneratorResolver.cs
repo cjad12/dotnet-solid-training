@@ -1,6 +1,6 @@
 ﻿using DevBasics.CarManagement.Dependencies;
 
-namespace DevBasics.CarManagement;
+namespace DevBasics.CarManagement.RegistrationNumberGenerators;
 
 public interface IRegistrationNumberGeneratorResolver
 {

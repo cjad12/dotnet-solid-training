@@ -1,9 +1,10 @@
 ﻿using DevBasics.CarManagement.Dependencies;
+using DevBasics.CarManagement.RegistrationNumberGenerators;
 using System;
 
 namespace DevBasics.CarManagement
 {
-	public class CarPoolNumberHelper : ICarPoolNumberHelper
+    public class CarPoolNumberHelper : ICarPoolNumberHelper
 	{
 	    private readonly IRegistrationNumberGeneratorResolver _registrationNumberGeneratorFactory;
 

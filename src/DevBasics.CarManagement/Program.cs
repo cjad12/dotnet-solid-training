@@ -3,9 +3,11 @@ using DevBasics.CarManagement.Dependencies;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DevBasics.CarManagement.RegistrationStrategies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
+using DevBasics.CarManagement.RegistrationNumberGenerators;
 
 
 namespace DevBasics.CarManagement
@@ -37,16 +39,24 @@ namespace DevBasics.CarManagement
             builder.Services.AddSingleton<ISettingsRepository, SettingsRepository>();
             builder.Services.AddSingleton<ICarRegistrationRepository, CarRegistrationRepository>();
 
+            // registration number generators
             var registrationNumberFactory = new RegistrationNumberGeneratorFactory();
             registrationNumberFactory.RegisterGenerator(CarBrand.Ford, new FordRegistrationNumberGenerator());
             registrationNumberFactory.RegisterGenerator(CarBrand.Toyota, new ToyotaRegistrationNumberGenerator());
             registrationNumberFactory.RegisterGenerator(CarBrand.Undefined, new UndefinedRegistrationNumberGenerator());
             builder.Services.AddSingleton<IRegistrationNumberGeneratorResolver>(registrationNumberFactory);
 
+            // registration strategies
+            builder.Services.AddSingleton<IRegistrationStrategy, RegisterRegistrationStrategy>();
+            builder.Services.AddSingleton<IRegistrationStrategy, UnregisterRegistrationStrategy>();
+            builder.Services.AddSingleton<IRegistrationStrategy, OverrideOrResetRegistrationStrategy>();
+
             builder.Services.AddSingleton<ICarPoolNumberHelper, CarPoolNumberHelper>();
             builder.Services.AddSingleton<IGlobalizationSettings, GlobalizationSettings>();
             builder.Services.AddSingleton<IHttpHeaderSettings, HttpHeaderSettings>();
             builder.Services.AddSingleton<ICarManagementService, CarManagementService>();
+
+            builder.Services.AddSingleton<ICarRepository, CarRepository>();
 
             var host = builder.Build();
 

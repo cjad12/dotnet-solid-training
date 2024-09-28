@@ -13,7 +13,7 @@ namespace DevBasics.CarManagement
     {
 	    private readonly IMapper _mapper;
 	    private readonly ICarPoolNumberHelper _carPoolNumberHelper;
-	    private readonly CarRepository _carRepository;
+	    private readonly ICarRepository _carRepository;
 
 	    public CarManagementService(IMapper mapper,
 	        IGlobalizationSettings globalizationSettings,
@@ -22,7 +22,8 @@ namespace DevBasics.CarManagement
 	        ILeasingRegistrationRepository leasingRegistrationRepository,
 	        ICarRegistrationRepository carRegistrationRepository,
 	        ISettingsRepository settingsRepository,
-	        ICarPoolNumberHelper carPoolNumberHelper)
+	        ICarPoolNumberHelper carPoolNumberHelper,
+	        ICarRepository carRepository)
                 : base(globalizationSettings, httpHeader,
                       leasingRegistrationRepository,
                       settingsRepository)
@@ -33,7 +34,7 @@ namespace DevBasics.CarManagement
 	        CarLeasingRepository = carRegistrationRepository;
             _mapper = mapper;
             _carPoolNumberHelper = carPoolNumberHelper;
-            _carRepository = new CarRepository(leasingRegistrationRepository, carRegistrationRepository);
+            _carRepository = carRepository;
         }
 
         public IBulkRegistrationService BulkRegistrationService { get; }

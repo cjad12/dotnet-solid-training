@@ -3,18 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DevBasics.CarManagement.Dependencies;
+using DevBasics.CarManagement.RegistrationStrategies;
 
 namespace DevBasics.CarManagement;
 
-public class CarRepository
+public class CarRepository : ICarRepository
 {
 	private readonly ILeasingRegistrationRepository _leasingRegistrationRepository;
 	private readonly ICarRegistrationRepository _carRegistrationRepository;
+	private readonly IEnumerable<IRegistrationStrategy> _registrationStrategies;
 
-	public CarRepository(ILeasingRegistrationRepository leasingRegistrationRepository, ICarRegistrationRepository carRegistrationRepository)
+	public CarRepository(ILeasingRegistrationRepository leasingRegistrationRepository, ICarRegistrationRepository carRegistrationRepository, IEnumerable<IRegistrationStrategy> registrationStrategies)
 	{
 		_leasingRegistrationRepository = leasingRegistrationRepository;
 		_carRegistrationRepository = carRegistrationRepository;
+		_registrationStrategies = registrationStrategies;
 	}
 
 	public async Task<string> BeginTransactionGenerateId(IList<string> cars,
@@ -41,7 +44,7 @@ public class CarRepository
 		}
 	}
 
-	private async Task<string> BeginTransactionAsync(IList<string> cars,
+	public async Task<string> BeginTransactionAsync(IList<string> cars,
 		string customerId, string companyId, RegistrationType registrationType, string identity,
 		string transactionId = null, string registrationNumber = null)
 	{
@@ -199,81 +202,31 @@ public class CarRepository
 				{
 					return oldTxState;
 				}
-				else
-				{
-					if (registrationType == RegistrationType.Register)
-					{
-						return TransactionResult.NotRegistered;
-					}
-					else
-					{
-						return TransactionResult.Failed;
-					}
 
+				if (registrationType == RegistrationType.Register)
+				{
+					return TransactionResult.NotRegistered;
 				}
+
+				return TransactionResult.Failed;
 			}
 
-			switch (registrationType)
+			bool responsibleRegistrationStrategyFound = false;
+			foreach (IRegistrationStrategy registrationStrategy in _registrationStrategies)
 			{
-				case RegistrationType.Register:
-					if (apiResponse.RegistrationId != null
-					    && apiResponse.Response != null
-					    && apiResponse.Response == "SUCCESS")
-					{
-						return TransactionResult.Registered;
-					}
-					else if (apiResponse.TransactionId != null || apiResponse.Errors != null)
-					{
-						Console.WriteLine("API responded with an error. Now checking if the car was registered the first time or subsequent...");
-						if (await IsFirstTransaction(dbCar.CarIdentificationNumber, dbCar.RegistrationId))
-						{
-							// if the car was imported the first time, set the state to error
-							Console.WriteLine($"Car was imported the first time. Returning transaction Result: {TransactionResult.NotRegistered.ToString()}");
+				if (!registrationStrategy.CanProcess(registrationType))
+					continue;
 
-							return TransactionResult.NotRegistered;
-						}
-						else
-						{
-							Console.WriteLine(
-								$"Car was tried to be registered with subsequent Registration-Transaction. " +
-								$"Returning the transaction result as it was before it the process started: {oldTxState.ToString()}");
+				responsibleRegistrationStrategyFound = true;
 
-							return oldTxState;
-						}
-					}
-					break;
+				TransactionResult? registrationResult = await registrationStrategy.Process(registrationType, apiResponse, dbCar, oldTxState);
+				if (registrationResult.HasValue)
+					return registrationResult.Value;
+			}
 
-				case RegistrationType.Unregister:
-					Console.WriteLine("Trying to analyze unregistration transaction result...");
-					if (!await IsFirstTransaction(dbCar.CarIdentificationNumber, dbCar.RegistrationId))
-					{
-						if (apiResponse.RegistrationId != null)
-						{
-							return TransactionResult.NotRegistered;
-						}
-						else if (apiResponse.TransactionId != null || apiResponse.Errors != null)
-						{
-							return oldTxState;
-						}
-					}
-					break;
-
-				case RegistrationType.Override:
-				case RegistrationType.Reset:
-					if (apiResponse.RegistrationId != null)
-					{
-						return TransactionResult.Progress;
-					}
-					else if (apiResponse.TransactionId != null
-					         || apiResponse.Errors != null)
-					{
-						return oldTxState;
-					}
-					break;
-
-				default:
-					Console.WriteLine($"BulkRegistrationType not valid. Transaction result cannot be determined.");
-					break;
+			if (!responsibleRegistrationStrategyFound)
+			{
+				Console.WriteLine($"BulkRegistrationType not valid. Transaction result cannot be determined.");
 			}
 
 			// If the algorithm executes to this point no transaction state change.
@@ -309,27 +262,5 @@ public class CarRepository
 		}
 
 		return null;
-	}
-
-	private async Task<bool> IsFirstTransaction(string carIdentificationNumber, string registrationRegistrationId)
-	{
-		Console.WriteLine($"Trying to analyze if this is the first transaction for car {carIdentificationNumber}...");
-
-		IEnumerable<CarRegistrationLogDto> carHistory = (await _carRegistrationRepository.GetCarHistoryAsync(carIdentificationNumber)).Where(x => x.RegistrationId == registrationRegistrationId);
-
-		if (carHistory != null)
-		{
-			IOrderedEnumerable<CarRegistrationLogDto> sortedCarHistory = carHistory.OrderBy(d => d.RowCreationDate);
-			bool isInitialTransaction = (!sortedCarHistory.Any(x => x.TransactionState == TransactionResult.Registered.ToString()));
-
-			Console.WriteLine($"History of car {carIdentificationNumber} is not null, returning {isInitialTransaction}");
-
-			return isInitialTransaction;
-		}
-		else
-		{
-			Console.WriteLine($"History of car {carIdentificationNumber} is null, returning true");
-			return true;
-		}
 	}
 }

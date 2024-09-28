@@ -9,7 +9,7 @@ namespace DevBasics.CarManagement
     {
         public IGlobalizationSettings GlobalizationSettings { get; set; }
 
-        public HttpHeaderSettings HttpHeader { get; set; }
+        public IHttpHeaderSettings HttpHeader { get; set; }
 
 
         public ILeasingRegistrationRepository LeasingRegistrationRepository { get; set; }
@@ -17,7 +17,7 @@ namespace DevBasics.CarManagement
 
 
         public BaseService(IGlobalizationSettings globalizationSettings,
-	        HttpHeaderSettings httpHeader,
+	        IHttpHeaderSettings httpHeader,
 	        ILeasingRegistrationRepository leasingRegistrationRepository,
 	        ISettingsRepository settingsRepository)
         {

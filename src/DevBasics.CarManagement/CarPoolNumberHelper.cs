@@ -3,11 +3,11 @@ using System;
 
 namespace DevBasics.CarManagement
 {
-	public class CarPoolNumberHelper
-    {
-	    private readonly RegistrationNumberGeneratorFactory _registrationNumberGeneratorFactory;
+	public class CarPoolNumberHelper : ICarPoolNumberHelper
+	{
+	    private readonly IRegistrationNumberGeneratorResolver _registrationNumberGeneratorFactory;
 
-	    public CarPoolNumberHelper(RegistrationNumberGeneratorFactory registrationNumberGeneratorFactory)
+	    public CarPoolNumberHelper(IRegistrationNumberGeneratorResolver registrationNumberGeneratorFactory)
 	    {
 		    _registrationNumberGeneratorFactory = registrationNumberGeneratorFactory;
 	    }

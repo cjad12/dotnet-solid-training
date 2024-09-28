@@ -3,7 +3,7 @@ using DevBasics.CarManagement.Dependencies;
 
 namespace DevBasics.CarManagement;
 
-public class RegistrationNumberGeneratorFactory
+public class RegistrationNumberGeneratorFactory: IRegistrationNumberGeneratorResolver
 {
 	Dictionary<CarBrand, IRegistrationNumberGenerator> _generators = new();
 

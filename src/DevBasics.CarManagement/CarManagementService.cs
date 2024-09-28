@@ -9,20 +9,20 @@ using static DevBasics.CarManagement.Dependencies.RegistrationApiResponseBase;
 
 namespace DevBasics.CarManagement
 {
-	public class CarManagementService : BaseService
+	public class CarManagementService : BaseService, ICarManagementService
     {
 	    private readonly IMapper _mapper;
-	    private readonly CarPoolNumberHelper _carPoolNumberHelper;
+	    private readonly ICarPoolNumberHelper _carPoolNumberHelper;
 	    private readonly CarRepository _carRepository;
 
 	    public CarManagementService(IMapper mapper,
 	        IGlobalizationSettings globalizationSettings,
-	        HttpHeaderSettings httpHeader,
+	        IHttpHeaderSettings httpHeader,
 	        IBulkRegistrationService bulkRegistrationService,
 	        ILeasingRegistrationRepository leasingRegistrationRepository,
 	        ICarRegistrationRepository carRegistrationRepository,
 	        ISettingsRepository settingsRepository,
-	        CarPoolNumberHelper carPoolNumberHelper)
+	        ICarPoolNumberHelper carPoolNumberHelper)
                 : base(globalizationSettings, httpHeader,
                       leasingRegistrationRepository,
                       settingsRepository)

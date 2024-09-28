@@ -22,6 +22,13 @@ namespace DevBasics.CarManagement
                 bulkRegistrationServiceMock,
                 mapper);
 
+            var registrationNumberFactory = new RegistrationNumberGeneratorFactory();
+            registrationNumberFactory.RegisterGenerator(CarBrand.Ford, new FordRegistrationNumberGenerator());
+            registrationNumberFactory.RegisterGenerator(CarBrand.Toyota, new ToyotaRegistrationNumberGenerator());
+            registrationNumberFactory.RegisterGenerator(CarBrand.Undefined, new UndefinedRegistrationNumberGenerator());
+
+            var carPoolNumberHelper = new CarPoolNumberHelper(registrationNumberFactory);
+
             var service = new CarManagementService(
                 mapper,
                 new GlobalizationSettings(),
@@ -29,7 +36,8 @@ namespace DevBasics.CarManagement
                 bulkRegistrationServiceMock,
                 leasingRegistrationRepository,
                 carRegistrationRepositoryMock,
-                settingsRepository);
+                settingsRepository,
+                carPoolNumberHelper);
 
             var result = await service.RegisterCarsAsync(
                 new RegisterCarsModel

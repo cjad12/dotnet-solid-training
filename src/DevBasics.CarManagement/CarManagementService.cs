@@ -12,6 +12,7 @@ namespace DevBasics.CarManagement
 	public class CarManagementService : BaseService
     {
 	    private readonly IMapper _mapper;
+	    private readonly CarPoolNumberHelper _carPoolNumberHelper;
 	    private readonly CarRepository _carRepository;
 
 	    public CarManagementService(IMapper mapper,
@@ -20,7 +21,8 @@ namespace DevBasics.CarManagement
 	        IBulkRegistrationService bulkRegistrationService,
 	        ILeasingRegistrationRepository leasingRegistrationRepository,
 	        ICarRegistrationRepository carRegistrationRepository,
-	        ISettingsRepository settingsRepository)
+	        ISettingsRepository settingsRepository,
+	        CarPoolNumberHelper carPoolNumberHelper)
                 : base(globalizationSettings, httpHeader,
                       leasingRegistrationRepository,
                       settingsRepository)
@@ -30,6 +32,7 @@ namespace DevBasics.CarManagement
 	        BulkRegistrationService = bulkRegistrationService;
 	        CarLeasingRepository = carRegistrationRepository;
             _mapper = mapper;
+            _carPoolNumberHelper = carPoolNumberHelper;
             _carRepository = new CarRepository(leasingRegistrationRepository, carRegistrationRepository);
         }
 
@@ -75,7 +78,7 @@ namespace DevBasics.CarManagement
                     }
                 }
 
-                CarPoolNumberHelper.Generate(
+                _carPoolNumberHelper.Generate(
                     CarBrand.Toyota,
                     registerCarsModel.Cars.FirstOrDefault().CarPool,
                     out string registrationId,
